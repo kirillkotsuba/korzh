@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Корж — пекарня и торты на заказ</title>
+<meta name="description" content="Пекарня «Корж»: свежая выпечка каждое утро и торты на заказ. Соберите торт в конструкторе онлайн.">
+<meta name="theme-color" content="#fff6ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff6ea; --cream: #fde9cf; --white: #fffdf8; --choc: #3b2418; --choc-2: #6b4a37; --muted: #a08572;
+    --berry: #ff6b81; --berry-2: #e8506a; --butter: #ffd166; --mint: #8fd3c1; --line: rgba(59,36,24,.12);
+    --ease: cubic-bezier(.22,.8,.24,1); --font: Nunito, -apple-system, "Segoe UI", Arial, sans-serif; --script: "Marck Script", cursive; --r: 28px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--choc); font: 500 16px/1.6 var(--font); overflow-x: hidden; }
+  body.lock { overflow: hidden; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  svg { display: block; }
+  ::selection { background: var(--berry); color: #fff; }
+  :focus-visible { outline: 3px solid var(--berry); outline-offset: 3px; border-radius: 10px; }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+  .script { font-family: var(--script); color: var(--berry); font-size: 30px; line-height: 1; }
+  .title { font-weight: 900; font-size: clamp(36px, 5vw, 68px); line-height: 1.02; letter-spacing: -.02em; margin-top: 8px; }
+  .title span { color: var(--berry); }
+  .lead { color: var(--choc-2); font-size: 18px; max-width: 520px; }
+  .sec { padding: 120px 0; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 56px; padding: 0 28px; border-radius: 999px; font-weight: 800; font-size: 16px; transition: transform .3s var(--ease), box-shadow .3s, background .3s; white-space: nowrap; }
+  .btn-berry { background: var(--berry); color: #fff; box-shadow: 0 6px 0 var(--berry-2); }
+  .btn-berry:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--berry-2); }
+  .btn-berry:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--berry-2); }
+  .btn-choc { background: var(--choc); color: #fff; box-shadow: 0 6px 0 #1f130c; }
+  .btn-choc:hover { transform: translateY(-2px); }
+  .btn-line { border: 2.5px solid var(--choc); }
+  .btn-line:hover { background: var(--choc); color: #fff; }
+  .btn-sm { height: 44px; padding: 0 20px; font-size: 14px; }
+  .rv { opacity: 0; transform: translateY(26px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+  .rv.in { opacity: 1; transform: none; }
+  .d1 { transition-delay: .1s; } .d2 { transition-delay: .2s; } .d3 { transition-delay: .3s; }
+
+  header.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; padding: 16px 0; transition: padding .3s, background .3s, box-shadow .3s; }
+  header.nav.scrolled { padding: 10px 0; background: rgba(255,246,234,.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 2px 0 var(--line); }
+  .nav .wrap { display: flex; align-items: center; gap: 34px; }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 26px; letter-spacing: -.02em; }
+  .logo svg { width: 34px; height: 34px; }
+  .menu { display: flex; gap: 26px; font-weight: 700; font-size: 15px; color: var(--choc-2); }
+  .menu a:hover { color: var(--berry); }
+  .nav-r { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+  .burger { display: none; width: 46px; height: 46px; border-radius: 50%; background: var(--white); border: 2px solid var(--line); position: relative; }
+  .burger span { position: absolute; left: 13px; right: 13px; height: 2.5px; border-radius: 2px; background: var(--choc); transition: transform .3s var(--ease), top .3s var(--ease); }
+  .burger span:nth-child(1) { top: 17px; } .burger span:nth-child(2) { top: 25px; }
+  .menu-open .burger span:nth-child(1) { top: 21px; transform: rotate(45deg); }
+  .menu-open .burger span:nth-child(2) { top: 21px; transform: rotate(-45deg); }
+  .mmenu { position: fixed; inset: 0; z-index: 45; background: var(--cream); display: flex; flex-direction: column; justify-content: center; padding: 0 22px; gap: 4px; clip-path: circle(0 at calc(100% - 50px) 44px); visibility: hidden; transition: clip-path .6s var(--ease), visibility 0s .6s; }
+  .menu-open .mmenu { clip-path: circle(150% at calc(100% - 50px) 44px); visibility: visible; transition: clip-path .6s var(--ease), visibility 0s; }
+  .mmenu a { font-weight: 900; font-size: 40px; line-height: 1.25; }
+  .mmenu .btn { margin-top: 22px; align-self: flex-start; }
+
+  .hero { min-height: 100vh; min-height: 100svh; padding: 110px 0 60px; display: flex; align-items: center; position: relative; overflow: hidden; }
+  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; width: 100%; }
+  .hero h1 { font-weight: 900; font-size: clamp(48px, 7vw, 108px); line-height: .98; letter-spacing: -.035em; margin: 10px 0 22px; }
+  .hero h1 span { color: var(--berry); }
+  .hero h1 .ln { display: block; overflow: hidden; padding-bottom: .04em; }
+  .hero h1 .ln > i { font-style: normal; display: inline-block; transform: translateY(110%); animation: up 1s var(--ease) forwards; }
+  .hero h1 .ln:nth-child(2) > i { animation-delay: .1s; } .hero h1 .ln:nth-child(3) > i { animation-delay: .2s; }
+  @keyframes up { to { transform: none; } }
+  .fade { opacity: 0; animation: fade 1s .45s var(--ease) forwards; }
+  @keyframes fade { to { opacity: 1; } }
+  .hero .actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 30px; }
+  .oven { display: inline-flex; align-items: center; gap: 12px; margin-top: 30px; padding: 12px 18px; border-radius: 999px; background: var(--white); font-weight: 700; font-size: 14px; box-shadow: 0 10px 24px -16px rgba(59,36,24,.5); }
+  .oven i { width: 10px; height: 10px; border-radius: 50%; background: #ff8a3d; box-shadow: 0 0 0 0 rgba(255,138,61,.6); animation: ping 1.8s infinite; }
+  @keyframes ping { 80%, 100% { box-shadow: 0 0 0 10px rgba(255,138,61,0); } }
+  .hero-art { position: relative; aspect-ratio: 1; max-width: 540px; width: 100%; justify-self: end; }
+  .hero-art .blob { position: absolute; inset: 4%; background: var(--cream); border-radius: 46% 54% 42% 58% / 52% 44% 56% 48%; animation: morph 10s ease-in-out infinite; }
+  @keyframes morph { 50% { border-radius: 56% 44% 58% 42% / 44% 56% 46% 54%; } }
+  .hero-art svg { position: absolute; inset: 6%; width: 88%; height: 88%; }
+  .hero-art .spin { transform-origin: 50% 88%; animation: turn 8s ease-in-out infinite; }
+  @keyframes turn { 50% { transform: rotate(-3deg) translateY(-6px); } }
+  .sticker { position: absolute; right: 2%; top: 10%; width: 120px; height: 120px; border-radius: 50%; background: var(--butter); display: grid; place-items: center; text-align: center; font-weight: 900; font-size: 14px; line-height: 1.1; transform: rotate(12deg); box-shadow: 0 6px 0 #e5b648; }
+  .sticker b { display: block; font-size: 28px; }
+  .sprinkle { position: absolute; width: 14px; height: 5px; border-radius: 4px; animation: dropS 6s linear infinite; }
+  @keyframes dropS { 0% { transform: translateY(-30px) rotate(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(460px) rotate(540deg); opacity: 0; } }
+
+  /* конструктор */
+  .cb { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; margin-top: 50px; background: var(--white); border-radius: 44px; overflow: hidden; box-shadow: 0 12px 0 var(--cream); }
+  .cake-view { background: radial-gradient(circle at 50% 35%, #fff, var(--cream)); position: relative; display: grid; place-items: center; padding: 30px; min-height: 560px; }
+  #cakeSvg { width: 100%; max-width: 460px; }
+  .cake-view .kg { position: absolute; left: 24px; top: 22px; background: var(--white); border-radius: 999px; padding: 8px 16px; font-weight: 800; font-size: 14px; }
+  .cake-view .ready { position: absolute; right: 24px; top: 22px; background: var(--mint); border-radius: 999px; padding: 8px 16px; font-weight: 800; font-size: 14px; }
+  .cc { padding: 36px; display: flex; flex-direction: column; }
+  .lbl { font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 20px 0 10px; display: flex; justify-content: space-between; }
+  .lbl:first-child { margin-top: 0; }
+  .lbl b { color: var(--choc); }
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .o { padding: 10px 16px; border-radius: 999px; background: var(--bg); font-weight: 700; font-size: 14px; border: 2px solid transparent; transition: all .2s; display: inline-flex; gap: 8px; align-items: center; }
+  .o:hover { border-color: var(--choc-2); }
+  .o.on { background: var(--choc); color: #fff; }
+  .o i { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+  .o small { opacity: .7; font-weight: 600; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 30px; background: transparent; }
+  input[type=range]::-webkit-slider-runnable-track { height: 10px; border-radius: 10px; background: linear-gradient(90deg, var(--berry) var(--fill, 20%), var(--cream) var(--fill, 20%)); }
+  input[type=range]::-moz-range-track { height: 10px; border-radius: 10px; background: var(--cream); }
+  input[type=range]::-moz-range-progress { height: 10px; border-radius: 10px; background: var(--berry); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -9px; border-radius: 50%; background: #fff; border: 4px solid var(--berry); }
+  input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 4px solid var(--berry); }
+  .txt { width: 100%; font: inherit; font-weight: 700; padding: 12px 16px; border-radius: 16px; border: 2px solid var(--line); background: var(--bg); color: var(--choc); }
+  .txt:focus { outline: none; border-color: var(--berry); }
+  .csum { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: auto; padding-top: 26px; }
+  .csum b { font-weight: 900; font-size: 34px; letter-spacing: -.02em; }
+  .csum small { display: block; color: var(--muted); font-size: 13px; font-weight: 700; }
+  .warn { color: var(--berry-2); font-size: 13px; font-weight: 700; margin-top: 6px; }
+
+  /* витрина */
+  .show-head { display: flex; justify-content: space-between; align-items: end; gap: 30px; flex-wrap: wrap; }
+  .shelf { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-top: 40px; }
+  .it { background: var(--white); border-radius: var(--r); padding: 22px; display: flex; flex-direction: column; transition: transform .4s var(--ease), opacity .9s var(--ease); }
+  .it:hover { transform: translateY(-6px) rotate(-1deg); }
+  .it .em { font-size: 64px; line-height: 1; text-align: center; margin: 6px 0 14px; filter: drop-shadow(0 10px 8px rgba(59,36,24,.15)); }
+  .it h3 { font-weight: 900; font-size: 19px; }
+  .it p { color: var(--muted); font-size: 14px; }
+  .it .left { font-size: 13px; font-weight: 800; color: var(--berry-2); margin: 10px 0 12px; }
+  .it .left.out { color: var(--muted); }
+  .it .row { margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
+  .it .row b { font-weight: 900; font-size: 20px; }
+  .qty { display: flex; align-items: center; gap: 6px; }
+  .qty button { width: 34px; height: 34px; border-radius: 50%; background: var(--bg); font-weight: 900; font-size: 18px; }
+  .qty button:disabled { opacity: .3; cursor: not-allowed; }
+  .qty output { min-width: 20px; text-align: center; font-weight: 900; }
+  .tray { margin-top: 20px; display: none; background: var(--choc); color: #fff; border-radius: 22px; padding: 16px 22px; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .tray.show { display: flex; }
+  .tray span { flex: 1; color: #f0d9c4; font-size: 14px; }
+  .tray b { font-size: 22px; font-weight: 900; }
+
+  .why { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 50px; }
+  .w { background: var(--white); border-radius: 24px; padding: 26px; transition: opacity .9s var(--ease), transform .9s var(--ease); }
+  .w .n { font-family: var(--script); font-size: 44px; color: var(--berry); line-height: 1; }
+  .w h3 { font-weight: 900; font-size: 19px; margin: 8px 0 6px; }
+  .w p { color: var(--choc-2); font-size: 15px; }
+  .revs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 50px; }
+  .rev { background: var(--white); border-radius: 26px; padding: 28px; display: flex; flex-direction: column; }
+  .rev .st { color: var(--butter); letter-spacing: 3px; font-size: 18px; text-shadow: 0 1px 0 #e5b648; }
+  .rev p { margin: 12px 0 20px; font-size: 17px; }
+  .rev .who { margin-top: auto; font-weight: 900; }
+  .rev .who small { display: block; color: var(--muted); font-weight: 600; }
+  .contact { background: var(--choc); color: #fff; border-radius: 48px 48px 0 0; padding: 100px 0 40px; position: relative; overflow: hidden; }
+  .contact .big { font-weight: 900; font-size: clamp(42px, 7.5vw, 112px); line-height: .98; letter-spacing: -.03em; }
+  .contact .big span { font-family: var(--script); font-weight: 400; color: var(--berry); }
+  .ctg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 56px; }
+  .ctg > div { background: rgba(255,255,255,.07); border-radius: 22px; padding: 22px; }
+  .ctg .lb { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #d9bfa9; margin-bottom: 6px; }
+  .ctg .v { font-weight: 700; font-size: 17px; }
+  .foot { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-top: 50px; font-size: 13px; color: #b89a85; }
+
+  .modal { position: fixed; inset: 0; z-index: 80; display: none; }
+  .modal.open { display: block; }
+  .modal .bg { position: absolute; inset: 0; background: rgba(59,36,24,.5); backdrop-filter: blur(5px); opacity: 0; animation: fade .3s forwards; }
+  .sheet { position: absolute; right: 0; top: 0; bottom: 0; width: min(560px, 100%); background: var(--white); padding: 26px 32px; overflow-y: auto; display: flex; flex-direction: column; animation: slide .5s var(--ease); border-radius: 36px 0 0 36px; }
+  @keyframes slide { from { transform: translateX(100%); } }
+  .sheet-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .close { width: 44px; height: 44px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-weight: 900; }
+  .bk-t { font-weight: 900; font-size: 30px; line-height: 1.05; letter-spacing: -.02em; }
+  .bk-s { color: var(--muted); margin: 6px 0 18px; font-size: 15px; }
+  .sum2 { background: var(--bg); border-radius: 20px; padding: 16px 18px; margin-bottom: 16px; display: grid; gap: 5px; font-size: 14px; }
+  .sum2 div { display: flex; justify-content: space-between; gap: 12px; }
+  .sum2 span { color: var(--muted); } .sum2 b { text-align: right; }
+  .sum2 .tot { font-size: 20px; font-weight: 900; margin-top: 4px; }
+  .seg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; padding: 5px; background: var(--bg); border-radius: 999px; margin-bottom: 14px; }
+  .seg button { height: 42px; border-radius: 999px; font-weight: 800; font-size: 14px; }
+  .seg button.on { background: var(--choc); color: #fff; }
+  .grp { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 12px 0 8px; }
+  .chips { display: grid; gap: 6px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .chip { border: 2px solid var(--line); border-radius: 16px; padding: 8px 2px; text-align: center; font-weight: 800; font-size: 14px; transition: all .2s; }
+  .chip small { display: block; font-size: 10px; color: var(--muted); font-weight: 700; }
+  .chip.on { background: var(--berry); color: #fff; border-color: var(--berry); }
+  .chip.on small { color: rgba(255,255,255,.8); }
+  .chip:disabled { opacity: .3; text-decoration: line-through; cursor: not-allowed; }
+  .fld { margin-bottom: 12px; }
+  .fld label { display: block; font-size: 13px; font-weight: 800; color: var(--muted); margin-bottom: 6px; }
+  .fld input { width: 100%; font: inherit; font-weight: 700; padding: 13px 16px; border-radius: 16px; border: 2px solid var(--line); background: var(--bg); color: var(--choc); }
+  .fld input:focus { outline: none; border-color: var(--berry); background: #fff; }
+  .note { font-size: 12px; color: var(--muted); }
+  .sheet-foot { margin-top: auto; padding-top: 20px; display: flex; gap: 10px; }
+  .sheet-foot .btn { flex: 1; }
+  .sheet-foot .btn[disabled] { opacity: .35; pointer-events: none; box-shadow: none; }
+  .done { text-align: center; padding-top: 24px; }
+  .done svg { width: 180px; margin: 0 auto 14px; animation: pop .6s var(--ease); }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  @media (max-width: 1100px) {
+    .menu { display: none; }
+    .burger { display: block; }
+    .hero .wrap, .cb { grid-template-columns: minmax(0, 1fr); }
+    .hero-art { justify-self: center; max-width: 440px; }
+    .cake-view { min-height: 420px; }
+    .shelf, .why { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .revs { grid-template-columns: minmax(0, 1fr); }
+    .ctg { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 680px) {
+    .wrap { padding: 0 16px; }
+    .sec { padding: 84px 0; }
+    .nav .btn { display: none; }
+    .hero h1 { font-size: clamp(44px, 13vw, 66px); }
+    .hero .actions .btn { flex: 1; }
+    .sticker { width: 92px; height: 92px; font-size: 11px; }
+    .sticker b { font-size: 20px; }
+    .cb { border-radius: 30px; }
+    .cake-view { min-height: 320px; padding: 16px; }
+    .cake-view .kg, .cake-view .ready { top: 12px; font-size: 12px; padding: 6px 12px; }
+    .cake-view .kg { left: 12px; } .cake-view .ready { right: 12px; }
+    .cc { padding: 22px 16px; }
+    .shelf { gap: 10px; }
+    .it { padding: 14px; border-radius: 22px; }
+    .it .em { font-size: 48px; }
+    .it h3 { font-size: 16px; }
+    .why { grid-template-columns: minmax(0, 1fr); }
+    .ctg { grid-template-columns: minmax(0, 1fr); }
+    .contact { border-radius: 30px 30px 0 0; }
+    .sheet { padding: 20px 16px; border-radius: 0; }
+  }
+  @media (max-width: 360px) { .logo { font-size: 22px; } .nav .wrap { gap: 10px; } .qty button { width: 30px; height: 30px; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    .rv { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a href="#" class="logo" aria-label="Корж — на главную"><svg viewBox="0 0 34 34"><rect x="4" y="16" width="26" height="14" rx="4" fill="#3b2418"/><rect x="4" y="12" width="26" height="8" rx="4" fill="#ff6b81"/><path d="M6 18 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 4 0" fill="#ff6b81"/><circle cx="17" cy="8" r="4" fill="#e8506a"/><path d="M17 4 q2 -3 4 -2" stroke="#5c8f5a" stroke-width="2" fill="none"/></svg>Корж</a>
+    <nav class="menu"><a href="#builder">Торт на заказ</a><a href="#shelf">Витрина</a><a href="#why">О нас</a><a href="#reviews">Отзывы</a><a href="#contacts">Контакты</a></nav>
+    <div class="nav-r">
+      <button class="btn btn-berry btn-sm" data-book>Заказать торт</button>
+      <button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+<div class="mmenu" id="mmenu"><a href="#builder">Торт на заказ</a><a href="#shelf">Витрина</a><a href="#contacts">Контакты</a><button class="btn btn-berry" data-book>Заказать торт</button></div>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="script fade">пекарня с 2019 года</span>
+      <h1><span class="ln"><i>Торты,</i></span><span class="ln"><i>от которых</i></span><span class="ln"><i><span>тают</span></i></span></h1>
+      <p class="lead fade">Печём из настоящего сливочного масла и бельгийского шоколада. Без маргарина и красителей «на всякий случай». Соберите свой торт прямо на сайте.</p>
+      <div class="actions fade"><a href="#builder" class="btn btn-berry">Собрать торт</a><a href="#shelf" class="btn btn-line">Свежая выпечка</a></div>
+      <div class="oven fade" id="oven"><i></i><span id="ovenText">Круассаны из печи в 8:00</span></div>
+    </div>
+    <div class="hero-art fade" aria-hidden="true">
+      <div class="blob"></div>
+      <svg viewBox="0 0 400 380" id="heroCake"></svg>
+      <div class="sticker"><div><b>от 2</b>дней<br>готовность</div></div>
+      <i class="sprinkle" style="left:22%;top:4%;background:#ff6b81"></i><i class="sprinkle" style="left:48%;top:0;background:#8fd3c1;animation-delay:1.5s"></i><i class="sprinkle" style="left:70%;top:6%;background:#ffd166;animation-delay:3s"></i><i class="sprinkle" style="left:35%;top:2%;background:#3b2418;animation-delay:4.5s"></i>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="builder" style="padding-top:30px">
+  <div class="wrap">
+    <div class="rv"><span class="script">конструктор</span><h2 class="title">Соберите <span>свой</span> торт</h2><p class="lead" style="margin-top:10px">Выберите ярусы, начинку и декор. Цена и дата готовности считаются сразу.</p></div>
+    <div class="cb rv">
+      <div class="cake-view" aria-live="polite"><span class="kg" id="kgLbl"></span><span class="ready" id="readyLbl"></span><div id="cakeSvg"></div></div>
+      <div class="cc">
+        <div class="lbl">Ярусы</div><div class="opts" id="oTiers" role="radiogroup" aria-label="Ярусы"></div>
+        <div class="lbl"><span>Гостей</span><b id="guestsV"></b></div><input type="range" id="guests" min="6" max="60" step="2" value="12" aria-label="Количество гостей">
+        <div class="warn" id="tierWarn" aria-live="polite"></div>
+        <div class="lbl">Начинка</div><div class="opts" id="oFill" role="radiogroup" aria-label="Начинка"></div>
+        <div class="lbl">Покрытие</div><div class="opts" id="oCover" role="radiogroup" aria-label="Покрытие"></div>
+        <div class="lbl">Декор</div><div class="opts" id="oDecor" role="group" aria-label="Декор"></div>
+        <div class="lbl"><span>Надпись на топпере</span><b id="insCnt">0/20</b></div><input class="txt" id="ins" maxlength="20" placeholder="Например: С днём рождения!">
+        <div class="csum"><div><small id="perKg"></small><b id="cPrice">—</b></div><button class="btn btn-berry" id="cOrder">Заказать торт</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="shelf" style="padding-top:20px">
+  <div class="wrap">
+    <div class="show-head"><div class="rv"><span class="script">сегодня на витрине</span><h2 class="title">Свежая <span>выпечка</span></h2></div><p class="lead rv d1" style="max-width:380px">Отложим для вас, заберите до 21:00. Остатки обновляются утром.</p></div>
+    <div class="shelf" id="shelfGrid"></div>
+    <div class="tray" id="tray"><b id="trayTotal"></b><span id="trayList"></span><button class="btn btn-berry btn-sm" id="trayBtn">Отложить</button></div>
+  </div>
+</section>
+
+<section class="sec" id="why" style="padding-top:20px">
+  <div class="wrap">
+    <div class="rv"><span class="script">почему мы</span><h2 class="title">Честная <span>выпечка</span></h2></div>
+    <div class="why">
+      <div class="w rv"><div class="n">82%</div><h3>Масло, не маргарин</h3><p>Только сливочное масло 82,5% и сливки 33%.</p></div>
+      <div class="w rv d1"><div class="n">4:30</div><h3>Печём на рассвете</h3><p>Утром на витрине только то, что испекли сегодня.</p></div>
+      <div class="w rv d2"><div class="n">0</div><h3>Без красителей</h3><p>Цвет даём ягодами, какао и матчей.</p></div>
+      <div class="w rv d3"><div class="n">♥</div><h3>Бесплатная дегустация</h3><p>Попробуйте начинки до заказа большого торта.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="reviews" style="padding-top:20px">
+  <div class="wrap">
+    <div class="rv"><span class="script">отзывы · 4,9 на картах</span><h2 class="title">Съели <span>до крошки</span></h2></div>
+    <div class="revs">
+      <div class="rev rv"><div class="st">★★★★★</div><p>Заказали трёхъярусный на свадьбу через конструктор. Получился точь-в-точь, гости просили добавки.</p><div class="who">Алина и Максим<small>Свадебный торт</small></div></div>
+      <div class="rev rv d1"><div class="st">★★★★★</div><p>Медовик как у бабушки, только лучше. Беру каждую пятницу к чаю.</p><div class="who">Ольга<small>Медовик</small></div></div>
+      <div class="rev rv d2"><div class="st">★★★★★</div><p>Отложила круассаны на сайте, забрала по пути на работу. Ещё тёплые!</p><div class="who">Ирина<small>Витрина</small></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contacts">
+  <div class="wrap">
+    <h2 class="big rv">Заходите<br><span>на чай</span></h2>
+    <div class="rv d1" style="margin-top:30px"><a href="#builder" class="btn btn-berry">Собрать торт</a></div>
+    <div class="ctg">
+      <div><div class="lb">Адрес</div><div class="v">ул. Пушкина, 10</div></div>
+      <div><div class="lb">Телефон</div><a class="v" href="tel:+70000000000">+7 (000) 000-00-00</a></div>
+      <div><div class="lb">Часы</div><div class="v">Ежедневно 7:30–21:00</div></div>
+      <div><div class="lb">Соцсети</div><div class="v"><a href="#">Telegram</a> · <a href="#">ВКонтакте</a></div></div>
+    </div>
+    <div class="foot"><span>© Пекарня «Корж»</span><span>Пример сайта. Пекарня, цены и контакты вымышлены.</span></div>
+  </div>
+</section>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Оформление заказа">
+  <div class="bg" data-close></div>
+  <div class="sheet">
+    <div class="sheet-top"><span class="script" id="mTitle">ваш торт</span><button class="close" data-close aria-label="Закрыть">✕</button></div>
+    <div id="bkBody"></div>
+    <div class="sheet-foot" id="bkFoot"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  function rub(n) { return Math.round(n).toLocaleString('ru-RU').replace(/ /g, ' ') + ' ₽'; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  var FILLS = [['choc', 'Шоколад-вишня', 2400, '#4a2a1d', '#a3233a'], ['van', 'Ваниль-клубника', 2200, '#f6e3c3', '#ff6b81'], ['red', 'Красный бархат', 2500, '#b5233a', '#fff4e6'], ['carrot', 'Морковный', 2300, '#d98a3d', '#fff4e6'], ['honey', 'Медовик', 2100, '#c98a3e', '#fbe2b4']];
+  var COVERS = [['cream', 'Крем-чиз', '#fff8ef', 0], ['velour', 'Розовый велюр', '#f6b3be', 300], ['drip', 'Шоколадные подтёки', '#fff8ef', 400], ['mint', 'Мятный', '#bfe8dc', 300], ['naked', 'Голый торт', 'naked', 0]];
+  var DECOR = [['berries', 'Ягоды', 700], ['flowers', 'Живые цветы', 900], ['macarons', 'Макаруны', 600], ['gold', 'Золотая поталь', 500]];
+  var cake = { tiers: 1, guests: 12, fill: 'choc', cover: 'drip', decor: { berries: true }, ins: '' };
+  function kg() { return Math.max(1, Math.round(cake.guests * .15 * 2) / 2); }
+  function minGuests(t) { return t === 1 ? 6 : t === 2 ? 20 : 36; }
+  function price() {
+    var f = FILLS.find(function (x) { return x[0] === cake.fill; }), c = COVERS.find(function (x) { return x[0] === cake.cover; });
+    var p = f[2] * kg() + c[3] * (kg() > 3 ? 2 : 1) + (cake.tiers - 1) * 1500;
+    DECOR.forEach(function (d) { if (cake.decor[d[0]]) p += d[2] * cake.tiers; });
+    if (cake.ins.trim()) p += 300;
+    return Math.round(p / 50) * 50;
+  }
+  function readyDays() { return cake.tiers === 3 || kg() >= 6 ? 4 : cake.tiers === 2 ? 3 : 2; }
+  function readyDate() { var d = new Date(); d.setDate(d.getDate() + readyDays()); return d; }
+  var MN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'], DW = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+  // ---------- Рисуем торт ----------
+  function cakeSvg(c, opt) {
+    opt = opt || {};
+    var f = FILLS.find(function (x) { return x[0] === c.fill; }), cv = COVERS.find(function (x) { return x[0] === c.cover; });
+    var widths = c.tiers === 1 ? [230] : c.tiers === 2 ? [260, 180] : [280, 210, 140], H = c.tiers === 1 ? 110 : c.tiers === 2 ? 90 : 76;
+    var base = 330, s = '<ellipse cx="200" cy="' + (base + 4) + '" rx="' + (widths[0] / 2 + 34) + '" ry="16" fill="#e9d6bf"/><ellipse cx="200" cy="' + base + '" rx="' + (widths[0] / 2 + 30) + '" ry="14" fill="#fff"/>';
+    var tops = [];
+    widths.forEach(function (w, i) {
+      var y = base - H * (i + 1), x = 200 - w / 2, col = cv[2] === 'naked' ? f[3] : cv[2];
+      s += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + H + '" rx="10" fill="' + col + '"/>';
+      if (cv[2] === 'naked') { for (var l = 1; l < 3; l++) s += '<rect x="' + (x + 4) + '" y="' + (y + H * l / 3 - 5) + '" width="' + (w - 8) + '" height="9" rx="4" fill="' + f[4] + '" opacity=".95"/>'; }
+      s += '<rect x="' + x + '" y="' + y + '" width="' + (w * .12) + '" height="' + H + '" rx="10" fill="#fff" opacity=".18"/>';
+      s += '<ellipse cx="200" cy="' + y + '" rx="' + w / 2 + '" ry="12" fill="' + col + '" style="filter:brightness(1.04)"/>';
+      if (c.cover === 'drip') {
+        var d = 'M' + x + ' ' + (y + 4); for (var k = 0; k <= 10; k++) { var xx = x + w * k / 10, len = 10 + ((k * 37 + i * 11) % 5) * 7; d += ' L' + xx.toFixed(1) + ' ' + (y + 4) + ' L' + xx.toFixed(1) + ' ' + (y + len) + ' Q' + (xx + w / 20).toFixed(1) + ' ' + (y + len + 8) + ' ' + (xx + w / 10).toFixed(1) + ' ' + (y + len) ; }
+        s += '<path d="' + d + ' L' + (x + w) + ' ' + (y + 4) + ' Z" fill="#3b2418" opacity=".95"/><ellipse cx="200" cy="' + y + '" rx="' + w / 2 + '" ry="12" fill="#3b2418"/>';
+      }
+      if (c.cover === 'velour') { for (var v = 0; v < 40; v++) s += '<circle cx="' + (x + 6 + (v * 53 % (w - 12))).toFixed(1) + '" cy="' + (y + 8 + (v * 29 % (H - 12))).toFixed(1) + '" r="1.2" fill="#e88a9b" opacity=".6"/>'; }
+      if (c.decor.gold) s += '<path d="M' + (x + w * .6) + ' ' + (y + H * .35) + ' l10 -6 l8 8 l-6 10 l-12 -2z" fill="#e2b33c"/><path d="M' + (x + w * .25) + ' ' + (y + H * .6) + ' l7 -4 l6 5 l-4 7 l-9 -1z" fill="#e2b33c"/>';
+      tops.push({ y: y, w: w });
+    });
+    var t = tops[tops.length - 1];
+    if (c.decor.berries) { [[-.28, 0], [-.12, -4], [.05, 2], [.2, -3], [.32, 1]].forEach(function (p, i) { var cx = 200 + p[0] * t.w; s += '<circle cx="' + cx + '" cy="' + (t.y + p[1] - 6) + '" r="9" fill="' + (i % 2 ? '#a3233a' : '#e8506a') + '"/><circle cx="' + (cx - 3) + '" cy="' + (t.y + p[1] - 9) + '" r="2.5" fill="#fff" opacity=".6"/>'; }); s += '<circle cx="' + (200 - .05 * t.w) + '" cy="' + (t.y - 14) + '" r="6" fill="#3b4fa0"/>'; }
+    if (c.decor.macarons) { [[-.3, '#f6b3be'], [.3, '#bfe8dc']].forEach(function (m) { var cx = 200 + m[0] * t.w; s += '<g transform="translate(' + cx + ' ' + (t.y - 12) + ')"><ellipse rx="14" ry="7" cy="-5" fill="' + m[1] + '"/><rect x="-12" y="-3" width="24" height="5" fill="#fff8ef"/><ellipse rx="14" ry="7" cy="5" fill="' + m[1] + '"/></g>'; }); }
+    if (c.decor.flowers) { [[.38, 6], [-.4, 10]].forEach(function (p, i) { var cx = 200 + p[0] * tops[0].w, cy = tops[0].y + p[1] + (c.tiers > 1 ? 0 : 0); s += '<g transform="translate(' + cx + ' ' + cy + ')">'; for (var q = 0; q < 6; q++) s += '<ellipse rx="6" ry="11" cy="-8" fill="' + (i ? '#fff' : '#f6b3be') + '" transform="rotate(' + q * 60 + ')"/>'; s += '<circle r="5" fill="#ffd166"/></g>'; }); }
+    if (c.ins && c.ins.trim()) {
+      var txt = esc(c.ins.trim()), tw = Math.min(200, 26 + txt.length * 8.4);
+      s += '<line x1="' + (200 - tw / 3) + '" y1="' + (t.y - 52) + '" x2="' + (200 - tw / 3) + '" y2="' + (t.y - 2) + '" stroke="#c9a66b" stroke-width="3"/><line x1="' + (200 + tw / 3) + '" y1="' + (t.y - 52) + '" x2="' + (200 + tw / 3) + '" y2="' + (t.y - 2) + '" stroke="#c9a66b" stroke-width="3"/>' +
+        '<rect x="' + (200 - tw / 2) + '" y="' + (t.y - 82) + '" width="' + tw + '" height="34" rx="17" fill="#e2b33c"/><text x="200" y="' + (t.y - 59) + '" text-anchor="middle" font-family="Marck Script, cursive" font-size="20" fill="#3b2418">' + txt + '</text>';
+    }
+    return '<svg viewBox="0 0 400 380"' + (opt.label ? ' role="img" aria-label="' + opt.label + '"' : ' aria-hidden="true"') + '><g class="' + (opt.cls || '') + '">' + s + '</g></svg>';
+  }
+
+  // шапка
+  var nav = document.getElementById('nav'), burger = document.getElementById('burger');
+  addEventListener('scroll', function () { nav.classList.toggle('scrolled', scrollY > 30); }, { passive: true });
+  function setMenu(o) { document.body.classList.toggle('menu-open', o); document.body.classList.toggle('lock', o); burger.setAttribute('aria-expanded', o); }
+  burger.addEventListener('click', function () { setMenu(!document.body.classList.contains('menu-open')); });
+  document.querySelectorAll('#mmenu a, #mmenu button').forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
+  (function oven() { var h = new Date().getHours(), t = h < 8 ? 'Круассаны из печи в 8:00' : h < 12 ? 'Багеты из печи в 12:00' : h < 16 ? 'Синнабоны из печи в 16:00' : h < 21 ? 'Свежая выпечка до 21:00' : 'Откроемся в 7:30, круассаны в 8:00'; document.getElementById('ovenText').textContent = t; })();
+  document.getElementById('heroCake').innerHTML = cakeSvg({ tiers: 3, fill: 'van', cover: 'velour', decor: { berries: true, flowers: true, gold: true }, ins: '' }, { cls: 'spin' }).replace(/^<svg[^>]*>|<\/svg>$/g, '');
+
+  // ---------- Конструктор ----------
+  var oT = document.getElementById('oTiers'), oF = document.getElementById('oFill'), oC = document.getElementById('oCover'), oD = document.getElementById('oDecor'), gR = document.getElementById('guests'), ins = document.getElementById('ins');
+  oT.innerHTML = [1, 2, 3].map(function (n) { return '<button class="o" role="radio" data-t="' + n + '">' + n + ' ' + (n === 1 ? 'ярус' : 'яруса') + '</button>'; }).join('');
+  oF.innerHTML = FILLS.map(function (f) { return '<button class="o" role="radio" data-f="' + f[0] + '"><i style="background:' + f[3] + '"></i>' + f[1] + '</button>'; }).join('');
+  oC.innerHTML = COVERS.map(function (c) { return '<button class="o" role="radio" data-c="' + c[0] + '"><i style="background:' + (c[2] === 'naked' ? 'repeating-linear-gradient(#c98a3e 0 4px,#fff4e6 4px 8px)' : c[0] === 'drip' ? 'linear-gradient(#3b2418 50%,#fff8ef 50%)' : c[2]) + '"></i>' + c[1] + (c[3] ? ' <small>+' + c[3] + '</small>' : '') + '</button>'; }).join('');
+  oD.innerHTML = DECOR.map(function (d) { return '<button class="o" data-d="' + d[0] + '" aria-pressed="false">' + d[1] + ' <small>+' + d[2] + '</small></button>'; }).join('');
+  function renderCake() {
+    oT.querySelectorAll('.o').forEach(function (b) { var on = +b.dataset.t === cake.tiers; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    oF.querySelectorAll('.o').forEach(function (b) { var on = b.dataset.f === cake.fill; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    oC.querySelectorAll('.o').forEach(function (b) { var on = b.dataset.c === cake.cover; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    oD.querySelectorAll('.o').forEach(function (b) { var on = !!cake.decor[b.dataset.d]; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    gR.value = cake.guests; gR.style.setProperty('--fill', ((cake.guests - 6) / 54 * 100) + '%');
+    document.getElementById('guestsV').textContent = cake.guests + ' чел.';
+    document.getElementById('tierWarn').textContent = cake.guests < minGuests(cake.tiers) ? '' : '';
+    var f = FILLS.find(function (x) { return x[0] === cake.fill; });
+    document.getElementById('cakeSvg').innerHTML = cakeSvg(cake, { label: 'Торт: ' + cake.tiers + ' ярус, ' + f[1].toLowerCase() });
+    document.getElementById('kgLbl').textContent = kg().toString().replace('.', ',') + ' кг';
+    var rd = readyDate(); document.getElementById('readyLbl').textContent = 'Готов с ' + rd.getDate() + ' ' + MN[rd.getMonth()];
+    document.getElementById('cPrice').textContent = rub(price());
+    document.getElementById('perKg').textContent = f[1] + ' · ' + rub(f[2]) + '/кг';
+    document.getElementById('insCnt').textContent = ins.value.length + '/20';
+  }
+  function setTiers(t) {
+    cake.tiers = t;
+    if (cake.guests < minGuests(t)) { cake.guests = minGuests(t); document.getElementById('tierWarn').textContent = 'Для ' + t + ' ярусов нужно минимум ' + minGuests(t) + ' гостей, увеличили.'; }
+    else document.getElementById('tierWarn').textContent = '';
+  }
+  document.querySelector('.cc').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.t) { setTiers(+b.dataset.t); var w = document.getElementById('tierWarn').textContent; renderCake(); document.getElementById('tierWarn').textContent = w; return; }
+    if (b.dataset.f) cake.fill = b.dataset.f;
+    else if (b.dataset.c) cake.cover = b.dataset.c;
+    else if (b.dataset.d) cake.decor[b.dataset.d] = !cake.decor[b.dataset.d];
+    else if (b.id === 'cOrder') { openModal({ kind: 'cake' }); return; }
+    else return;
+    renderCake();
+  });
+  gR.addEventListener('input', function () {
+    cake.guests = +gR.value; var mt = minGuests(cake.tiers), w = '';
+    if (cake.guests < mt) { cake.tiers = cake.guests >= 20 ? 2 : 1; w = 'Для такого количества гостей хватит ' + cake.tiers + ' ' + (cake.tiers === 1 ? 'яруса' : 'ярусов') + '.'; }
+    renderCake(); document.getElementById('tierWarn').textContent = w;
+  });
+  ins.addEventListener('input', function () { cake.ins = ins.value; renderCake(); });
+  renderCake();
+
+  // ---------- Витрина ----------
+  var SHELF = [['cro', '🥐', 'Круассан', 'классический, на масле', 120, 14], ['cin', '🌀', 'Синнабон', 'с крем-чизом', 190, 6], ['bag', '🥖', 'Багет', 'на закваске', 140, 9], ['ecl', '🍫', 'Эклер', 'шоколадный', 160, 0], ['hon', '🍯', 'Медовик', 'кусочек 150 г', 260, 8], ['ch', '🍰', 'Чизкейк', 'Нью-Йорк, кусочек', 290, 3], ['mac', '🎨', 'Макаруны', 'набор из 6 шт.', 450, 5], ['pie', '🥧', 'Пирог с вишней', 'целый, 1 кг', 890, 2]];
+  var tray = {};
+  function renderShelf() {
+    document.getElementById('shelfGrid').innerHTML = SHELF.map(function (s, i) {
+      var q = tray[s[0]] || 0, left = s[5] - q;
+      return '<div class="it rv in' + (i % 4 ? ' d' + i % 4 : '') + '"><div class="em" aria-hidden="true">' + s[1] + '</div><h3>' + s[2] + '</h3><p>' + s[3] + '</p><div class="left' + (s[5] ? '' : ' out') + '">' + (s[5] ? 'Осталось: ' + left + ' шт.' : 'Закончился, будет завтра') + '</div><div class="row"><b>' + rub(s[4]) + '</b><div class="qty"><button data-sd="' + s[0] + '" aria-label="Меньше: ' + s[2] + '"' + (q ? '' : ' disabled') + '>−</button><output aria-live="polite">' + q + '</output><button data-si="' + s[0] + '" aria-label="Больше: ' + s[2] + '"' + (left > 0 ? '' : ' disabled') + '>+</button></div></div></div>';
+    }).join('');
+    var ids = Object.keys(tray).filter(function (k) { return tray[k]; }), total = ids.reduce(function (a, k) { return a + tray[k] * SHELF.find(function (s) { return s[0] === k; })[4]; }, 0);
+    document.getElementById('tray').classList.toggle('show', ids.length > 0);
+    document.getElementById('trayTotal').textContent = rub(total);
+    document.getElementById('trayList').textContent = ids.map(function (k) { return SHELF.find(function (s) { return s[0] === k; })[2] + ' × ' + tray[k]; }).join(', ');
+  }
+  document.getElementById('shelfGrid').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.disabled) return;
+    var id = b.dataset.si || b.dataset.sd; tray[id] = Math.max(0, (tray[id] || 0) + (b.dataset.si ? 1 : -1));
+    renderShelf(); var again = document.querySelector('[data-' + (b.dataset.si ? 'si' : 'sd') + '="' + id + '"]'); if (again && !again.disabled) again.focus({ preventScroll: true });
+  });
+  document.getElementById('trayBtn').addEventListener('click', function () { openModal({ kind: 'tray' }); });
+  renderShelf();
+
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .12, rootMargin: '0px 0px -40px 0px' }) : null;
+  document.querySelectorAll('.rv').forEach(function (el) { if (io) io.observe(el); else el.classList.add('in'); });
+
+  // ---------- Оформление ----------
+  var modal = document.getElementById('modal'), st = {}, lastFocus = null;
+  function openModal(o) {
+    lastFocus = document.activeElement;
+    st = { kind: o.kind || 'cake', delivery: false, day: null, addr: '', name: '', phone: '', done: false };
+    document.getElementById('mTitle').textContent = st.kind === 'cake' ? 'ваш торт' : 'отложить выпечку';
+    modal.classList.add('open'); document.body.classList.add('lock');
+    render(); setTimeout(function () { modal.querySelector('.close').focus(); }, 50);
+  }
+  function closeModal() { modal.classList.remove('open'); document.body.classList.remove('lock'); if (lastFocus && document.contains(lastFocus) && lastFocus.offsetParent !== null) lastFocus.focus(); }
+  document.querySelectorAll('[data-book]').forEach(function (b) { b.addEventListener('click', function () { openModal({ kind: 'cake' }); }); });
+  modal.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeModal(); });
+  function days() { var o = [], d = new Date(); d.setHours(0, 0, 0, 0); var start = st.kind === 'cake' ? readyDays() : 0; for (var i = start; i < start + 5; i++) { var x = new Date(d); x.setDate(d.getDate() + i); o.push(x); } return o; }
+  function trayTotal() { return Object.keys(tray).reduce(function (a, k) { return a + tray[k] * SHELF.find(function (s) { return s[0] === k; })[4]; }, 0); }
+  function total() { return st.kind === 'cake' ? price() + (st.delivery ? 500 : 0) : trayTotal(); }
+  function valid() { return st.day !== null && st.name.trim().length > 1 && st.phone.replace(/\D/g, '').length === 11 && (!st.delivery || st.addr.trim().length > 5); }
+  function render() {
+    var body = document.getElementById('bkBody'), foot = document.getElementById('bkFoot'), ds = days(), html = '';
+    if (st.done) {
+      body.innerHTML = '<div class="done">' + (st.kind === 'cake' ? cakeSvg(cake) : '<div style="font-size:90px">🥐</div>') + '<div class="bk-t">Спасибо, ' + esc(st.name.trim().split(/\s+/)[0]) + '!</div><p class="bk-s" style="max-width:380px;margin:10px auto 0">' + (st.kind === 'cake' ? 'Кондитер позвонит в течение часа, чтобы уточнить детали. ' + (st.delivery ? 'Привезём ' : 'Заберите ') + ds[st.day].getDate() + ' ' + MN[ds[st.day].getMonth()] + '.' : 'Отложили до 21:00 ' + (st.day === 0 ? 'сегодня' : ds[st.day].getDate() + ' ' + MN[ds[st.day].getMonth()]) + '. Оплата на кассе.') + '</p></div>';
+      foot.innerHTML = '<button class="btn btn-berry" data-close>Ура!</button>'; return;
+    }
+    if (st.kind === 'cake') {
+      var f = FILLS.find(function (x) { return x[0] === cake.fill; }), c = COVERS.find(function (x) { return x[0] === cake.cover; }), dec = DECOR.filter(function (d) { return cake.decor[d[0]]; }).map(function (d) { return d[1].toLowerCase(); });
+      html = '<div class="bk-t">Торт ' + kg().toString().replace('.', ',') + ' кг</div><div class="bk-s">Предоплата 30% после звонка кондитера.</div><div class="sum2"><div><span>Ярусы</span><b>' + cake.tiers + '</b></div><div><span>Начинка</span><b>' + f[1] + '</b></div><div><span>Покрытие</span><b>' + c[1] + '</b></div>' + (dec.length ? '<div><span>Декор</span><b>' + dec.join(', ') + '</b></div>' : '') + (cake.ins.trim() ? '<div><span>Надпись</span><b>' + esc(cake.ins.trim()) + '</b></div>' : '') + '<div class="tot"><span style="color:inherit">Итого</span><b>' + rub(total()) + '</b></div></div>' +
+        '<div class="seg" role="radiogroup"><button data-dl="0" role="radio" aria-checked="' + !st.delivery + '" class="' + (!st.delivery ? 'on' : '') + '">Самовывоз</button><button data-dl="1" role="radio" aria-checked="' + st.delivery + '" class="' + (st.delivery ? 'on' : '') + '">Доставка +500 ₽</button></div>';
+    } else {
+      html = '<div class="bk-t">Отложим для вас</div><div class="bk-s">Заберите до 21:00, оплата на кассе.</div><div class="sum2">' + Object.keys(tray).filter(function (k) { return tray[k]; }).map(function (k) { var s = SHELF.find(function (x) { return x[0] === k; }); return '<div><span>' + s[2] + ' × ' + tray[k] + '</span><b>' + rub(s[4] * tray[k]) + '</b></div>'; }).join('') + '<div class="tot"><span style="color:inherit">Итого</span><b>' + rub(total()) + '</b></div></div>';
+    }
+    html += '<div class="grp">' + (st.kind === 'cake' ? 'Дата (ближайшая — через ' + readyDays() + ' дн.)' : 'Когда заберёте') + '</div><div class="chips">' + ds.slice(0, st.kind === 'cake' ? 5 : 2).map(function (d, i) { return '<button class="chip' + (st.day === i ? ' on' : '') + '" data-day="' + i + '"><small>' + (st.kind !== 'cake' && i === 0 ? 'Сегодня' : st.kind !== 'cake' && i === 1 ? 'Завтра' : DW[d.getDay()]) + '</small>' + d.getDate() + '</button>'; }).join('') + '</div>';
+    if (st.kind === 'cake' && st.delivery) html += '<div class="fld" style="margin-top:12px"><label for="fAddr">Адрес доставки</label><input id="fAddr" value="' + esc(st.addr) + '" placeholder="Улица, дом, квартира"></div>';
+    html += '<div class="fld" style="margin-top:12px"><label for="fName">Имя</label><input id="fName" autocomplete="name" value="' + esc(st.name) + '"></div><div class="fld"><label for="fPhone">Телефон</label><input id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__" value="' + esc(st.phone) + '"></div><p class="note">Это демонстрационный сайт: заказ никуда не отправляется.</p>';
+    body.innerHTML = html;
+    foot.innerHTML = '<button class="btn btn-berry" data-send' + (valid() ? '' : ' disabled') + '>' + (st.kind === 'cake' ? 'Заказать за ' + rub(total()) : 'Отложить') + '</button>';
+    var n = document.getElementById('fName'), p = document.getElementById('fPhone'), a = document.getElementById('fAddr');
+    function upd() { var b = document.querySelector('[data-send]'); if (b) b.disabled = !valid(); }
+    n.addEventListener('input', function () { st.name = n.value; upd(); });
+    if (a) a.addEventListener('input', function () { st.addr = a.value; upd(); });
+    p.addEventListener('focus', function () { if (!p.value) p.value = '+7 ('; });
+    p.addEventListener('input', function () { p.value = maskPhone(p.value); st.phone = p.value; upd(); });
+  }
+  function maskPhone(v) {
+    var d = v.replace(/\D/g, ''); if (!d) return '';
+    var n = /^\s*\+7/.test(v) ? d.slice(1) : d;
+    if (n.length === 11 && (n[0] === '8' || n[0] === '7')) n = n.slice(1);
+    n = n.slice(0, 10);
+    if (!n) return v.length < 4 ? '' : '+7 (';
+    var r = '+7 (' + n.slice(0, 3);
+    if (n.length > 3) r += ') ' + n.slice(3, 6);
+    if (n.length > 6) r += '-' + n.slice(6, 8);
+    if (n.length > 8) r += '-' + n.slice(8, 10);
+    return r;
+  }
+  modal.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.dl) { st.delivery = b.dataset.dl === '1'; return render(); }
+    if (b.dataset.day) { st.day = +b.dataset.day; return render(); }
+    if (b.hasAttribute('data-send')) {
+      if (st.kind === 'tray') { SHELF.forEach(function (s) { if (tray[s[0]]) s[5] -= tray[s[0]]; }); tray = {}; renderShelf(); }
+      st.done = true; render(); modal.querySelector('.sheet').scrollTop = 0;
+    }
+  });
+  addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (modal.classList.contains('open')) closeModal();
+      else if (document.body.classList.contains('menu-open')) { setMenu(false); burger.focus(); }
+      return;
+    }
+    if (e.key === 'Tab' && modal.classList.contains('open')) {
+      var f = [].filter.call(modal.querySelectorAll('button, input'), function (el) { return !el.disabled && el.offsetParent !== null; });
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+    }
+  });
+})();
+</script>
+</body>
+</html>
